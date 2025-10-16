@@ -12,10 +12,10 @@ st.set_page_config(
     page_title="AutoReportAI - Gerador Inteligente",
     layout="wide",
     page_icon="📊",
-    initial_sidebar_state="expanded"
+    initial_sidebar_state="collapsed"
 )
 
-# CSS customizado para melhorar a aparência
+# CSS customizado
 st.markdown("""
 <style>
     .main-header {
@@ -30,13 +30,6 @@ st.markdown("""
         color: #64748b;
         font-size: 1.1rem;
         margin-bottom: 2rem;
-    }
-    .metric-card {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        padding: 1.5rem;
-        border-radius: 10px;
-        color: white;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
     }
     .success-box {
         background-color: #d1fae5;
@@ -66,9 +59,6 @@ st.markdown("""
     .stButton>button:hover {
         transform: translateY(-2px);
         box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
-    }
-    .sidebar .stSelectbox, .sidebar .stSlider, .sidebar .stCheckbox {
-        margin-bottom: 1rem;
     }
     .reference-item {
         background-color: #f8fafc;
@@ -139,71 +129,31 @@ with col3:
 
 st.markdown("<br>", unsafe_allow_html=True)
 
-# --- SIDEBAR CONFIGURAÇÕES ---
-with st.sidebar:
-    st.markdown("### ⚙️ Configurações")
-    st.markdown("---")
-    
-    with st.expander("📝 Informações Básicas", expanded=True):
-        title = st.text_input(
-            "Título do relatório",
-            "Relatório Técnico Automático",
-            help="Defina um título descritivo para seu relatório"
-        )
-    
-    with st.expander("🎨 Estilo e Formato", expanded=True):
-        style = st.selectbox(
-            "Estilo de escrita",
-            ["technical", "concise", "detailed"],
-            index=0,
-            help="• Technical: Linguagem técnica e formal\n• Concise: Direto ao ponto\n• Detailed: Explicações aprofundadas"
-        )
-        
-        reference_format = st.selectbox(
-            "Formato de referências",
-            ["IEEE", "APA"],
-            index=0,
-            help="Escolha o padrão de citação"
-        )
-    
-    with st.expander("🔍 Recuperação de Documentos", expanded=True):
-        retrieve_references = st.checkbox(
-            "Recuperar referências",
-            True,
-            help="Buscar documentos relevantes no corpus"
-        )
-        
-        top_k = st.slider(
-            "Número de referências",
-            1, 10, 6,
-            help="Quantidade de documentos a recuperar"
-        )
-    
-    st.markdown("---")
-    st.markdown("### 💡 Dicas")
-    st.info("""
-    **Para melhores resultados:**
-    - Seja específico no contexto
-    - Use 3-6 seções principais
-    - Escolha o estilo adequado
-    """)
-
 # --- ÁREA PRINCIPAL ---
-tab1, tab2, tab3 = st.tabs(["📄 Criar Relatório", "📊 Estatísticas", "❓ Ajuda"])
+tab1, tab2, tab3 = st.tabs(["📄 Criar Documento", "📊 Estatísticas", "❓ Ajuda"])
 
 with tab1:
+    st.markdown("### 📝 Informações Básicas")
+    
+    title = st.text_input(
+        "Título do documento",
+        "Documento Técnico Automático",
+        help="Defina um título descritivo para seu documento"
+    )
+    
+    st.markdown("<br>", unsafe_allow_html=True)
     st.markdown("### 🧠 Contexto do Documento")
-    st.markdown("Descreva o tema e objetivo")
+    st.markdown("Descreva o tema e objetivo do seu documento")
     
     context = st.text_area(
         "",
-        placeholder="Exemplo: Este relatório analisa o desempenho de modelos de aprendizado de máquina aplicados à classificação de defeitos em processos industriais, com foco em redes neurais convolucionais e técnicas de aumento de dados...",
+        placeholder="Exemplo: Este documento analisa o desempenho de modelos de aprendizado de máquina aplicados à classificação de defeitos em processos industriais, com foco em redes neurais convolucionais e técnicas de aumento de dados...",
         height=180,
         label_visibility="collapsed"
     )
     
     st.markdown("<br>", unsafe_allow_html=True)
-    st.markdown("### 📑 Estrutura")
+    st.markdown("### 📑 Estrutura do Documento")
     st.markdown("Defina as seções que comporão seu documento")
     
     col_preset, col_custom = st.columns([1, 2])
@@ -243,6 +193,17 @@ with tab1:
     
     st.markdown("<br>", unsafe_allow_html=True)
     
+    # Nota sobre configurações automáticas
+    # st.markdown("""
+    # <div class="info-box">
+    #     <strong>ℹ️ Configurações Automáticas</strong><br>
+    #     Este sistema usa configurações otimizadas automaticamente:
+    #     • Estilo: Técnico e formal<br>
+    #     • Formato de referências: IEEE<br>
+    #     • Recuperação inteligente de documentos relevantes
+    # </div>
+    # """, unsafe_allow_html=True)
+    
     # Botão de geração
     col_btn1, col_btn2, col_btn3 = st.columns([1, 2, 1])
     with col_btn2:
@@ -252,33 +213,37 @@ with tab1:
         if not context.strip():
             st.error("⚠️ Por favor, preencha o contexto antes de gerar.")
         elif not section_list:
-            st.error("⚠️ Adicione pelo menos uma seção ao relatório.")
+            st.error("⚠️ Adicione pelo menos uma seção ao documento.")
         else:
             # Progress bar animado
             progress_bar = st.progress(0)
             status_text = st.empty()
             
             status_text.text("🔄 Preparando requisição...")
-            progress_bar.progress(20)
-            time.sleep(0.3)
+            progress_bar.progress(10)
+            time.sleep(0.2)
             
             try:
                 payload = {
                     "title": title,
                     "context": context,
-                    "sections": section_list,
-                    "style": style,
-                    "reference_format": reference_format,
-                    "retrieve_references": retrieve_references,
-                    "top_k": top_k
+                    "sections": section_list
                 }
                 
-                status_text.text("🤖 Gerando conteúdo com IA...")
-                progress_bar.progress(40)
+                status_text.text(f"🤖 Gerando {len(section_list)} seções com IA...")
+                progress_bar.progress(20)
                 
-                response = requests.post(f"{API_URL}/generate-report", json=payload, timeout=120)
+                # Fazer requisição SEM timeout - aguardar o tempo necessário
+                status_text.text("⏳ Processando... Isso pode levar alguns minutos dependendo do tamanho do documento.")
+                progress_bar.progress(30)
                 
-                progress_bar.progress(80)
+                response = requests.post(
+                    f"{API_URL}/generate-report", 
+                    json=payload,
+                    timeout=None  # SEM TIMEOUT - aguarda indefinidamente
+                )
+                
+                progress_bar.progress(90)
                 
                 if response.status_code == 200:
                     progress_bar.progress(100)
@@ -309,7 +274,7 @@ with tab1:
                         # Botão de download
                         md_bytes = data["content"].encode('utf-8')
                         st.download_button(
-                            label="⬇️ Baixar Relatório (Markdown)",
+                            label="⬇️ Baixar Documento (Markdown)",
                             data=md_bytes,
                             file_name=f"{data['report_id']}.md",
                             mime="text/markdown",
@@ -328,7 +293,7 @@ with tab1:
                                 </div>
                                 """, unsafe_allow_html=True)
                         else:
-                            st.info("Nenhuma referência foi recuperada para este relatório.")
+                            st.info("Nenhuma referência foi recuperada para este documento.")
                     
                     with view_tab3:
                         met_col1, met_col2, met_col3 = st.columns(3)
@@ -342,28 +307,29 @@ with tab1:
                         st.markdown("---")
                         st.markdown("**Detalhes da Configuração:**")
                         config_info = f"""
-                        - **Estilo:** {style.capitalize()}
-                        - **Formato de Referências:** {reference_format}
-                        - **Top-K Documentos:** {top_k}
-                        - **Recuperação Ativa:** {'✅ Sim' if retrieve_references else '❌ Não'}
+                        - **Estilo:** Technical (Técnico e Formal)
+                        - **Formato de Referências:** IEEE
+                        - **Top-K Documentos:** 6
+                        - **Recuperação Ativa:** ✅ Sim
                         """
                         st.markdown(config_info)
                 
                 else:
                     progress_bar.empty()
                     status_text.empty()
-                    st.error(f"❌ Erro ao gerar relatório: {response.status_code}")
+                    st.error(f"❌ Erro ao gerar documento: {response.status_code}")
                     with st.expander("Ver detalhes do erro"):
                         st.code(response.text)
             
-            except requests.exceptions.Timeout:
+            except requests.exceptions.RequestException as e:
                 progress_bar.empty()
                 status_text.empty()
-                st.error("⏱️ Timeout: O servidor demorou muito para responder. Tente novamente.")
+                st.error(f"❌ Erro de conexão: {str(e)}")
+                st.info("💡 Verifique se o backend está rodando em http://localhost:8000")
             except Exception as e:
                 progress_bar.empty()
                 status_text.empty()
-                st.error(f"❌ Erro de conexão: {e}")
+                st.error(f"❌ Erro inesperado: {str(e)}")
 
 with tab2:
     st.markdown("### 📊 Estatísticas do Sistema")
@@ -373,11 +339,15 @@ with tab2:
             status = requests.get(f"{API_URL}/").json()
             corpus_stats = requests.get(f"{API_URL}/corpus-stats").json()
             
-            st.markdown("#### Status Geral")
-            st.json(status)
+            col_stat1, col_stat2 = st.columns(2)
             
-            st.markdown("#### Corpus de Documentos")
-            st.json(corpus_stats)
+            with col_stat1:
+                st.markdown("#### Status Geral")
+                st.json(status)
+            
+            with col_stat2:
+                st.markdown("#### Corpus de Documentos")
+                st.json(corpus_stats)
             
         except Exception as e:
             st.error(f"Erro ao obter estatísticas: {e}")
@@ -390,33 +360,41 @@ with tab3:
     st.markdown("""
     #### 🚀 Guia Rápido
     
-    1. **Configure seu relatório** na barra lateral:
-       - Defina título e estilo de escrita
-       - Escolha o formato de referências
-       - Ajuste parâmetros de recuperação
+    1. **Defina o título** do seu documento
     
-    2. **Descreva o contexto** do relatório:
-       - Seja claro e específico
+    2. **Descreva o contexto** do documento:
+       - Seja claro e específico sobre o tema
        - Inclua objetivos e escopo
-       - Mencione técnicas ou metodologias
+       - Mencione técnicas ou metodologias relevantes
     
-    3. **Defina as seções**:
-       - Use modelos pré-definidos ou personalize
+    3. **Escolha ou personalize as seções**:
+       - Use modelos pré-definidos (Acadêmico, Técnico, Executivo)
+       - Ou personalize as seções conforme sua necessidade
        - Uma seção por linha
-       - Ordem será mantida no documento
+       - A ordem será mantida no documento final
     
-    4. **Gere e baixe** seu relatório:
+    4. **Gere e baixe** seu documento:
+       - Clique em "Gerar Documento"
+       - Aguarde o processamento (pode levar alguns minutos)
        - Visualize o conteúdo gerado
-       - Revise as referências
+       - Revise as referências utilizadas
        - Baixe em formato Markdown
     
     ---
     
     #### 💡 Dicas de Uso
     
-    - **Estilo Technical**: Ideal para papers e documentação técnica
-    - **Estilo Concise**: Melhor para resumos executivos
-    - **Estilo Detailed**: Use para relatórios completos e aprofundados
+    - **Contexto detalhado**: Quanto mais informações você fornecer no contexto, melhor será o resultado
+    - **Seções bem definidas**: Use títulos claros e específicos para cada seção
+    - **Aguarde pacientemente**: A geração de documentos com IA pode levar tempo, especialmente para documentos longos
+    
+    #### ⚙️ Configurações Automáticas
+    
+    O sistema usa configurações otimizadas automaticamente:
+    - **Estilo de escrita**: Técnico e formal, ideal para documentos acadêmicos e profissionais
+    - **Formato de referências**: IEEE (padrão internacional para documentos técnicos)
+    - **Recuperação de documentos**: Busca automática de 6 documentos mais relevantes
+    - **IA avançada**: Utiliza modelos de linguagem de última geração
     
     #### 🔧 Requisitos
     
@@ -424,12 +402,27 @@ with tab3:
     - Modelos de IA carregados (embedding + LLM)
     - Corpus de documentos indexado
     
-    #### 📞 Suporte
+    #### 📞 Solução de Problemas
     
-    Em caso de problemas:
-    - Verifique se o backend está online (card no topo)
-    - Revise os logs do FastAPI
-    - Ajuste os parâmetros de geração
+    Se encontrar problemas:
+    - ✅ Verifique se o backend está online (card no topo da página)
+    - ✅ Revise os logs do FastAPI no terminal
+    - ✅ Certifique-se de que há espaço suficiente em disco
+    - ✅ Verifique a conexão de internet (para download de modelos)
+    
+    #### 🎯 Exemplos de Uso
+    
+    **Documento Acadêmico:**
+    - Contexto: "Análise comparativa de algoritmos de deep learning para detecção de fraudes em transações financeiras"
+    - Seções: Resumo, Introdução, Revisão da Literatura, Metodologia, Resultados, Discussão, Conclusão
+    
+    **Relatório Técnico:**
+    - Contexto: "Implementação de sistema de monitoramento em tempo real usando IoT e edge computing"
+    - Seções: Sumário Executivo, Especificações Técnicas, Arquitetura, Implementação, Testes
+    
+    **Apresentação Executiva:**
+    - Contexto: "Proposta de adoção de MLOps para otimizar pipeline de machine learning"
+    - Seções: Sumário Executivo, Contexto, Análise, Recomendações, Próximos Passos
     """)
 
 # Footer
@@ -437,6 +430,5 @@ st.markdown("---")
 st.markdown("""
 <div style="text-align: center; color: #64748b; padding: 1rem;">
     <p style="margin: 0;">AutoReportAI v1.0</p>
-    <p style="margin: 0; font-size: 0.875rem;">Powered by AI • 2024</p>
 </div>
 """, unsafe_allow_html=True)
