@@ -1,0 +1,30 @@
+[
+  {
+    "id": "ml_intro",
+    "title": "Fundamentos de Machine Learning",
+    "text": "Machine learning representa um paradigma revolucionário na ciência da computação, permitindo que sistemas computacionais aprendam e melhorem seu desempenho através da experiência, sem serem explicitamente programados para cada tarefa específica.\n\nA essência do machine learning reside na capacidade de identificar padrões em dados e utilizar esses padrões para fazer previsões ou tomar decisões. Este processo envolve três componentes fundamentais: dados de treinamento, um algoritmo de aprendizado e um modelo resultante.",
+    "source": "Journal of Artificial Intelligence Research",
+    "year": "2024",
+    "authors": [
+      "Silva, M.",
+      "Santos, R."
+    ],
+    "chunk_id": 0,
+    "original_title": "Fundamentos de Machine Learning",
+    "upload_timestamp": "2025-11-13T23:59:35.657900"
+  },
+  {
+    "id": "ml_intro",
+    "title": "Fundamentos de Machine Learning",
+    "text": "Os algoritmos de machine learning podem ser categorizados em três paradigmas principais. O aprendizado supervisionado utiliza dados rotulados para treinar modelos que mapeiam entradas para saídas conhecidas. O aprendizado não supervisionado descobre estruturas ocultas em dados não rotulados. O aprendizado por reforço aprende através de interação com um ambiente, recebendo recompensas ou penalidades.\n\nAplicações práticas de machine learning permeiam diversos setores: reconhecimento de imagem e voz, sistemas de recomendação, diagnóstico médico, previsão financeira, veículos autônomos e processamento de linguagem natural.",
+    "source": "Journal of Artificial Intelligence Research",
+    "year": "2024",
+    "authors": [
+      "Silva, M.",
+      "Santos, R."
+    ],
+    "chunk_id": 1,
+    "original_title": "Fundamentos de Machine Learning",
+    "upload_timestamp": "2025-11-13T23:59:35.657900"
+  }
+]

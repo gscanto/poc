@@ -1,0 +1,14 @@
+requests
+fastapi
+pydantic
+torch
+transformers
+sentence-transformers
+faiss-cpu
+numpy
+python-docx
+PyPDF2
+uvicorn
+python-multipart
+openai
+streamlit
