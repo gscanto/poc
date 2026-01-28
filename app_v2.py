@@ -340,16 +340,15 @@ st.markdown("""
         </div>
         <div class="logo-text">
             <h1>AutoReportAI v2.0</h1>
-            <p>Gerador Inteligente de Documentos com Persistência Automática</p>
+            <p>Gerador Inteligente de Documentos com Persistência Automática e Reranking</p>
         </div>
     </div>
 </div>
 """, unsafe_allow_html=True)
 
-# --- TABS ---
-tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs([
+# --- TABS (removida aba de Modelos) ---
+tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
     "📝 Criar Documento",
-    "🤖 Modelos",
     "⚙️ Sistema",
     "📊 Estatísticas",
     "💾 Persistência",
@@ -434,7 +433,7 @@ with tab1:
                     status_text.markdown(f'{icon("clock")} Gerando documento...', unsafe_allow_html=True)
                     progress_bar.progress(30)
                     
-                    response = requests.post(f"{API_URL}/generate-report", json=payload, timeout=300)
+                    response = requests.post(f"{API_URL}/generate-report", json=payload, timeout=None)
                     progress_bar.progress(100)
                     
                     if response.status_code == 200:
@@ -478,216 +477,9 @@ with tab1:
                     status_text.empty()
 
 # --------------------------------------------------------------------
-# TAB 2 - Modelos
+# TAB 2 - Sistema (antiga TAB 3)
 # --------------------------------------------------------------------
 with tab2:
-    st.markdown(f'### <span class="icon-inline">{icon("brain", 24)}</span> Seleção de Modelo de Linguagem', unsafe_allow_html=True)
-    
-    # Obter modelo atual
-    try:
-        model_response = requests.get(f"{API_URL}/current-model", timeout=5)
-        if model_response.status_code == 200:
-            model_data = model_response.json()
-            current_model_name = model_data.get('model_name', 'Desconhecido')
-            model_loaded = model_data.get('model_loaded', False)
-            device = model_data.get('device', 'unknown')
-            available_models_map = model_data.get('available_models', {})
-        else:
-            current_model_name = "Erro ao obter modelo"
-            model_loaded = False
-            device = "unknown"
-            available_models_map = {}
-    except:
-        current_model_name = "Backend offline"
-        model_loaded = False
-        device = "unknown"
-        available_models_map = {}
-    
-    # Status do modelo atual
-    st.markdown("#### 🤖 Modelo Atual")
-    col_model, col_device, col_status = st.columns(3)
-    
-    with col_model:
-        status_icon = "✅" if model_loaded else "❌"
-        st.markdown(f"""
-        <div class='status-card' style='background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)'>
-            <h3>Modelo</h3>
-            <p style='font-size: 0.9rem;'>{status_icon}</p>
-        </div>
-        """, unsafe_allow_html=True)
-    
-    with col_device:
-        device_color = "#10b981" if device == "cuda" else "#3b82f6"
-        st.markdown(f"""
-        <div class='status-card' style='background: linear-gradient(135deg, {device_color} 0%, {device_color} 100%)'>
-            <h3>Device</h3>
-            <p>{device.upper()}</p>
-        </div>
-        """, unsafe_allow_html=True)
-    
-    with col_status:
-        st.markdown(f"""
-        <div class='status-card' style='background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%)'>
-            <h3>Status</h3>
-            <p>{"🟢" if model_loaded else "🔴"}</p>
-        </div>
-        """, unsafe_allow_html=True)
-    
-    # Informações do modelo atual
-    st.markdown('<div class="info-card">', unsafe_allow_html=True)
-    st.markdown(f"**Modelo carregado:** `{current_model_name}`")
-    st.markdown(f"**Device de execução:** `{device}`")
-    st.markdown(f"**Status:** {'✅ Carregado e pronto' if model_loaded else '❌ Não carregado (usando fallback)'}")
-    st.markdown('</div>', unsafe_allow_html=True)
-    
-    # Seleção de modelo
-    st.markdown("#### 📋 Modelos Disponíveis")
-    st.markdown('<div class="info-card">', unsafe_allow_html=True)
-    
-    llm_options = [
-        "Phi-2 (2.7B parâmetros)",
-        "GPT-Neo-2.7B (2.7B parâmetros)",
-        "GPT-J-6B (6B parâmetros)",
-        "Falcon-7B-Instruct (7B parâmetros)",
-        "Llama-2-7B-Chat (7B parâmetros)",
-        "Mistral-7B-Instruct (7B parâmetros)"
-    ]
-    
-    # Mapear nome amigável para nome do modelo
-    model_mapping = {
-        "Phi-2 (2.7B parâmetros)": "microsoft/phi-2",
-        "GPT-Neo-2.7B (2.7B parâmetros)": "EleutherAI/gpt-neo-2.7B",
-        "GPT-J-6B (6B parâmetros)": "EleutherAI/gpt-j-6B",
-        "Falcon-7B-Instruct (7B parâmetros)": "tiiuae/falcon-7b-instruct",
-        "Llama-2-7B-Chat (7B parâmetros)": "meta-llama/Llama-2-7b-chat-hf",
-        "Mistral-7B-Instruct (7B parâmetros)": "mistralai/Mistral-7B-Instruct-v0.1"
-    }
-    
-    # Encontrar seleção atual
-    current_selection = "Phi-2 (2.7B parâmetros)"  # Padrão
-    for friendly_name, model_id in model_mapping.items():
-        if model_id == current_model_name:
-            current_selection = friendly_name
-            break
-    
-    selected_model_friendly = st.selectbox(
-        "Escolha o modelo de linguagem:",
-        llm_options,
-        index=llm_options.index(current_selection),
-        help="Modelos maiores geram texto de melhor qualidade mas requerem mais memória"
-    )
-    
-    selected_model_id = model_mapping[selected_model_friendly]
-    
-    # Informações sobre o modelo selecionado
-    model_info = {
-        "Phi-2 (2.7B parâmetros)": {
-            "size": "2.7B parâmetros",
-            "memory": "~6 GB RAM/VRAM",
-            "speed": "⚡⚡⚡ Rápido",
-            "quality": "⭐⭐⭐ Boa",
-            "description": "Modelo compacto e eficiente da Microsoft, ideal para execução local."
-        },
-        "GPT-Neo-2.7B (2.7B parâmetros)": {
-            "size": "2.7B parâmetros",
-            "memory": "~6 GB RAM/VRAM",
-            "speed": "⚡⚡⚡ Rápido",
-            "quality": "⭐⭐⭐ Boa",
-            "description": "Modelo open-source da EleutherAI, versátil para tarefas gerais."
-        },
-        "GPT-J-6B (6B parâmetros)": {
-            "size": "6B parâmetros",
-            "memory": "~12 GB RAM/VRAM",
-            "speed": "⚡⚡ Médio",
-            "quality": "⭐⭐⭐⭐ Muito Boa",
-            "description": "Modelo mais poderoso da EleutherAI, ótimo equilíbrio qualidade/performance."
-        },
-        "Falcon-7B-Instruct (7B parâmetros)": {
-            "size": "7B parâmetros",
-            "memory": "~14 GB RAM/VRAM",
-            "speed": "⚡⚡ Médio",
-            "quality": "⭐⭐⭐⭐ Muito Boa",
-            "description": "Modelo otimizado para instruções, desenvolvido pela TII."
-        },
-        "Llama-2-7B-Chat (7B parâmetros)": {
-            "size": "7B parâmetros",
-            "memory": "~14 GB RAM/VRAM",
-            "speed": "⚡⚡ Médio",
-            "quality": "⭐⭐⭐⭐⭐ Excelente",
-            "description": "Modelo de alta qualidade da Meta, otimizado para conversação e instrução."
-        },
-        "Mistral-7B-Instruct (7B parâmetros)": {
-            "size": "7B parâmetros",
-            "memory": "~14 GB RAM/VRAM",
-            "speed": "⚡⚡ Médio",
-            "quality": "⭐⭐⭐⭐⭐ Excelente",
-            "description": "Modelo state-of-the-art da Mistral AI, excelente para tarefas técnicas."
-        }
-    }
-    
-    info = model_info[selected_model_friendly]
-    
-    st.markdown("**Informações do Modelo:**")
-    col1, col2 = st.columns(2)
-    with col1:
-        st.markdown(f"- **Tamanho:** {info['size']}")
-        st.markdown(f"- **Memória necessária:** {info['memory']}")
-    with col2:
-        st.markdown(f"- **Velocidade:** {info['speed']}")
-        st.markdown(f"- **Qualidade:** {info['quality']}")
-    
-    st.info(f"ℹ️ {info['description']}")
-    
-    st.markdown('</div>', unsafe_allow_html=True)
-    
-    # Botão para trocar modelo
-    col_btn1, col_btn2 = st.columns([2, 1])
-    with col_btn1:
-        if st.button("🔄 Carregar Modelo Selecionado", use_container_width=True, type="primary", key="load_model_btn"):
-            if selected_model_id == current_model_name and model_loaded:
-                st.info("✅ Este modelo já está carregado!")
-            else:
-                with st.spinner(f"Carregando {selected_model_friendly}... Isso pode levar alguns minutos..."):
-                    try:
-                        response = requests.post(
-                            f"{API_URL}/change-model",
-                            params={"model_name": selected_model_id},
-                            timeout=300  # 5 minutos de timeout
-                        )
-                        
-                        if response.status_code == 200:
-                            result = response.json()
-                            st.success(f"✅ Modelo {selected_model_friendly} carregado com sucesso!")
-                            st.balloons()
-                            time.sleep(1)
-                            st.rerun()
-                        else:
-                            st.error(f"❌ Erro ao carregar modelo: {response.status_code}")
-                            st.code(response.text)
-                    except Exception as e:
-                        st.error(f"❌ Erro: {e}")
-                        st.warning("⚠️ O carregamento pode demorar. Verifique os logs do backend.")
-    
-    with col_btn2:
-        if st.button("🔄 Atualizar Status", use_container_width=True, key="refresh_model_status_btn"):
-            st.rerun()
-    
-    # Avisos importantes
-    st.markdown("#### ⚠️ Notas Importantes")
-    st.markdown('<div class="warning-box">', unsafe_allow_html=True)
-    st.markdown("""
-    - **GPU Recomendada:** Modelos maiores (6B+) requerem GPU para melhor performance
-    - **Memória:** Certifique-se de ter RAM/VRAM suficiente
-    - **Primeiro Carregamento:** O download do modelo pode levar vários minutos
-    - **Troca de Modelo:** O modelo anterior será descarregado da memória
-    - **Fallback:** Se o carregamento falhar, o sistema usará geração por template
-    """)
-    st.markdown('</div>', unsafe_allow_html=True)
-
-# --------------------------------------------------------------------
-# TAB 3 - Sistema
-# --------------------------------------------------------------------
-with tab3:
     st.markdown(f'### <span class="icon-inline">{icon("settings", 24)}</span> Status do Sistema', unsafe_allow_html=True)
     
     col_refresh, col_test = st.columns([3, 1])
@@ -729,12 +521,13 @@ with tab3:
                 """, unsafe_allow_html=True)
             
             with col4:
-                openai_status = "✓" if status_data.get('openai_configured') else "✗"
-                color = "#10b981" if status_data.get('openai_configured') else "#ef4444"
+                model_name = status_data.get('llm_model', 'N/A')
+                if len(model_name) > 15:
+                    model_name = model_name.split('/')[-1][:15]
                 st.markdown(f"""
-                <div class='status-card' style='background: linear-gradient(135deg, {color} 0%, {color} 100%)'>
-                    <h3>OpenAI</h3>
-                    <p>{openai_status}</p>
+                <div class='status-card' style='background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%)'>
+                    <h3>Modelo</h3>
+                    <p style='font-size: 0.9rem;'>{model_name}</p>
                 </div>
                 """, unsafe_allow_html=True)
             
@@ -745,10 +538,12 @@ with tab3:
             info_cols = st.columns(2)
             with info_cols[0]:
                 st.metric("📚 Documentos Indexados", status_data.get('documents_indexed', 0))
+                st.metric("🧠 Modelo de Linguagem", status_data.get('llm_model', 'N/A'))
             with info_cols[1]:
                 persistence = status_data.get('persistence', {})
                 persist_status = "✅ Ativo" if persistence.get('enabled') else "❌ Inativo"
                 st.metric("💾 Sistema de Persistência", persist_status)
+                st.metric("🎯 Reranking", "✅ Ativo")
             
             st.markdown('</div>', unsafe_allow_html=True)
             
@@ -764,9 +559,9 @@ with tab3:
         st.error(f"❌ Não foi possível conectar ao backend: {e}")
 
 # --------------------------------------------------------------------
-# TAB 4 - Estatísticas
+# TAB 3 - Estatísticas (antiga TAB 4)
 # --------------------------------------------------------------------
-with tab4:
+with tab3:
     st.markdown(f"### <span class='icon-inline'>{icon('chart', 24)}</span> Estatísticas do Corpus", unsafe_allow_html=True)
     
     col_refresh = st.columns([3, 1])
@@ -819,9 +614,9 @@ with tab4:
         st.error(f"❌ Erro ao carregar estatísticas: {e}")
 
 # --------------------------------------------------------------------
-# TAB 5 - Persistência
+# TAB 4 - Persistência (antiga TAB 5)
 # --------------------------------------------------------------------
-with tab5:
+with tab4:
     st.markdown(f'### <span class="icon-inline">{icon("database", 24)}</span> Gestão de Persistência', unsafe_allow_html=True)
     
     # Botões de ação
@@ -931,9 +726,9 @@ with tab5:
         st.error(f"❌ Erro ao carregar informações de persistência: {e}")
 
 # --------------------------------------------------------------------
-# TAB 6 - Referências (com upload)
+# TAB 5 - Referências (antiga TAB 6, com upload)
 # --------------------------------------------------------------------
-with tab6:
+with tab5:
     st.markdown(f"### <span class='icon-inline'>{icon('upload', 24)}</span> Upload de Referências", unsafe_allow_html=True)
     
     st.markdown('<div class="info-card">', unsafe_allow_html=True)
@@ -1002,7 +797,7 @@ with tab6:
                     upload_response = requests.post(
                         f"{API_URL}/upload-documents",
                         json=documents_to_upload,
-                        timeout=60
+                        timeout=None
                     )
                     
                     if upload_response.status_code == 200:
@@ -1074,9 +869,9 @@ with tab6:
         st.error(f"❌ Erro de conexão: {e}")
 
 # --------------------------------------------------------------------
-# TAB 7 - Documentos Gerados
+# TAB 6 - Documentos Gerados (antiga TAB 7)
 # --------------------------------------------------------------------
-with tab7:
+with tab6:
     st.markdown(f"### <span class='icon-inline'>{icon('folder', 24)}</span> Documentos Gerados", unsafe_allow_html=True)
     
     try:
@@ -1120,7 +915,7 @@ with tab7:
 st.markdown("---")
 st.markdown("""
 <div style='text-align: center; color: #64748b; padding: 2rem 0;'>
-    <p><b>AutoReportAI v2.0</b> - Sistema Inteligente de Geração de Documentos com Persistência Automática</p>
-    <p style='font-size: 0.875rem;'>Desenvolvido com ❤️ usando FastAPI, Streamlit, FAISS e OpenAI</p>
+    <p><b>AutoReportAI v2.0</b> - Sistema Inteligente de Geração de Documentos com Persistência Automática e Reranking</p>
+    <p style='font-size: 0.875rem;'>Desenvolvido com ❤️ usando FastAPI, Streamlit, FAISS e Transformers</p>
 </div>
 """, unsafe_allow_html=True)
